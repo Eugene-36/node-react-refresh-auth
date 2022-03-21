@@ -22,9 +22,13 @@ class UserService {
       password: hashedPassword,
       activationLink,
     });
-    await mailService.sendActivationMail(email, activationLink);
+    await mailService.sendActivationMail(
+      email,
+      `${process.env.API_URL}/api/activate/${activationLink}`
+    );
 
     const userDto = new UserDto(user); // id, email, isActivated
+
     const tokens = tokenService.generateTokens({ ...userDto });
     await tokenService.saveToken(userDto.id, tokens.refreshToken);
 
@@ -32,6 +36,15 @@ class UserService {
       ...tokens,
       user: userDto,
     };
+  }
+  async activate(activationLink) {
+    const user = await UserModel.findOne({ activationLink });
+    if (!user) {
+      throw new Error('Некорректная ссылка активации');
+    }
+
+    user.isActivated = true;
+    await user.save();
   }
 }
 
