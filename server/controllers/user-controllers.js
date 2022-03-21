@@ -12,21 +12,21 @@ class UserControllers {
       });
       return res.json(userData);
     } catch (e) {
-      console.log('controllers error:', e.message);
+      next(e);
     }
   }
 
   async login(req, res, next) {
     try {
     } catch (e) {
-      console.log('controllers error:', e.message);
+      next(e);
     }
   }
 
   async logout(req, res, next) {
     try {
     } catch (e) {
-      console.log('controllers error:', e.message);
+      next(e);
     }
   }
 
@@ -37,21 +37,21 @@ class UserControllers {
       await userService.activate(activationLink);
       return res.redirect(process.env.CLIENT_URL);
     } catch (e) {
-      console.log('controllers error:', e.message);
+      next(e);
     }
   }
 
   async refresh(req, res, next) {
     try {
     } catch (e) {
-      console.log('controllers error:', e.message);
+      next(e);
     }
   }
 
   async getUsers(req, res, next) {
     try {
     } catch (e) {
-      console.log('controllers error:', e.message);
+      next(e);
     }
   }
 }

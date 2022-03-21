@@ -4,6 +4,8 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 
+//? Подключаю блок мидделваров
+const errorMiddleware = require('./middelwares/error-middelware.js');
 //? Импортируем роутер
 const router = require('./router/index.js');
 
@@ -17,6 +19,7 @@ app.use(cors());
 //? Первым параметром передаём маршрут по которому этот роутер будет
 //? отрабатывать, а вторым параметром передаём сам роутер
 app.use('/api', router);
+app.use(errorMiddleware);
 
 const start = async () => {
   try {
