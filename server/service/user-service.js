@@ -47,6 +47,63 @@ class UserService {
     user.isActivated = true;
     await user.save();
   }
+
+  async login(email, password) {
+    //Находим пользователя и убеждаемся что он существует у нас в базе
+    const user = await UserModel.findOne({ email });
+    // Выдаём ошибку если пользователь не найден
+    if (!user) {
+      throw ApiError.BadRequest('Пользователь с таким email не найден');
+    }
+
+    // Сравниваем пароль который нам
+    //отправил пользователь с паролем который у нас в базе
+    const isPassEquals = await bcrypt.compare(password, user.password);
+
+    //Проверка если пароли не верны
+    if (!isPassEquals) {
+      throw ApiError.BadRequest('Неверный пароль');
+    }
+    const userDto = new UserDto(user);
+    const tokens = tokenService.generateTokens({ ...userDto });
+    await tokenService.saveToken(userDto.id, tokens.refreshToken);
+    return {
+      ...tokens,
+      user: userDto,
+    };
+  }
+
+  async logout(refreshToken) {
+    const token = await tokenService.removeToken(refreshToken);
+    return token;
+  }
+
+  async refresh(refreshToken) {
+    if (!refreshToken) {
+      throw ApiError.UnauthorizedError();
+    }
+    const userData = tokenService.validateRefreshToken(refreshToken);
+    const tokenFromOb = await tokenService.findToken(refreshToken);
+
+    if (!userData || !tokenFromOb) {
+      throw ApiError.UnauthorizedError();
+    }
+    const user = await UserModel.findById(userData.id);
+    const userDto = new UserDto(user); // id, email, isActivated
+
+    const tokens = tokenService.generateTokens({ ...userDto });
+    await tokenService.saveToken(userDto.id, tokens.refreshToken);
+
+    return {
+      ...tokens,
+      user: userDto,
+    };
+  }
+
+  async getAllUsers() {
+    const users = await UserModel.find();
+    return users;
+  }
 }
 
 module.exports = new UserService();
