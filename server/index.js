@@ -14,7 +14,12 @@ const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors());
+app.use(
+  cors({
+    credentials: true,
+    origin: process.env.CLIENT_URL,
+  })
+);
 
 //? Первым параметром передаём маршрут по которому этот роутер будет
 //? отрабатывать, а вторым параметром передаём сам роутер
